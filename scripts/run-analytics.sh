@@ -1,0 +1,10 @@
+#!/bin/bash
+
+ROOT_DIRECTORY=/root
+ANALYTICS_DIRECTORY=$ROOT_DIRECTORY/taep-analytics
+SCRIPTS_DIRECTORY=$ROOT_DIRECTORY/taep-scripts
+
+cd $ANALYTICS_DIRECTORY
+./scripts/run-it.sh
+
+cd $SCRIPTS_DIRECTORY

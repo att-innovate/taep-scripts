@@ -1,0 +1,46 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          TAEP NOS
+# Required-Start:    $network $remote_fs $syslog
+# Required-Stop:     $network $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: <TAEP>
+# Description:       <TAEP Network Operating System>
+### END INIT INFO
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:/root/.cargo/bin
+export LD_LIBRARY_PATH=/root/bf-sde/install/lib/tofinopd/l2_switching:/root/bf-sde/install/lib
+
+DESC="TAEP"
+ROOT_DIRECTORY=/root
+SDE=$ROOT_DIRECTORY/bf-sde
+CONTROLLER_DIRECTORY=$ROOT_DIRECTORY/taep-controller
+TAEP=./target/debug/taep_controller
+ARGS=./config/config.yml
+
+PIDFILE=/var/run/taep.pid
+LOGFILE=/var/log/taep
+
+. /lib/lsb/init-functions
+
+case $1 in
+	start)
+		log_daemon_msg "Starting TAEP controller" "taep"
+		$SDE/install/bin/bf_kdrv_mod_load $SDE/install
+		start-stop-daemon --start --pidfile $PIDFILE --make-pidfile --no-close --background --chdir $CONTROLLER_DIRECTORY --exec $TAEP -- $ARGS > $LOGFILE 2>&1
+		status=$?
+		log_end_msg $status
+  	;;
+	stop)
+		log_daemon_msg "Stopping TAEP controller" "taep"
+		start-stop-daemon --stop --pidfile $PIDFILE
+		log_end_msg $?
+		rm -f $PIDFILE
+		$SDE/install/bin/bf_kdrv_mod_unload
+		;;
+	*)
+		echo "Usage: $0 {start|stop}"
+		exit 2
+		;;
+esac
